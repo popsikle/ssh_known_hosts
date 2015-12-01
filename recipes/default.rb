@@ -34,8 +34,14 @@ if node['ssh_known_hosts']['use_data_bag_cache']
   Chef::Log.info "hosts data bag: #{hosts.inspect}"
   ssh_known_hosts_entries hosts
 else
-  # FIXME: should change the syntax here, but chef-zero's search parser is broken
-  ssh_known_hosts_from_node_search("keys_ssh:* NOT name:#{node.name}")
+  query = "keys_ssh:* NOT name:#{node.name}"
+  unless node['ssh_known_hosts']['multi_environment'].empty?
+    query += ' AND (chef_environment:' +
+             node['ssh_known_hosts']['multi_environment'].join(
+               ' OR chef_environment:'
+             ) + ')'
+  end
+  ssh_known_hosts_from_node_search(query)
 end
 
 ssh_known_hosts_from_data_bag('ssh_known_hosts')

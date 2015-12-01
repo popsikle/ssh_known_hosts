@@ -3,36 +3,41 @@ driver:
 
 provisioner:
   name: chef_zero
-  deprecations_as_errors: true
-
-verifier:
-  name: inspec
 
 platforms:
-  - name: centos-6.9
-  - name: centos-7.3
-  - name: debian-7.11
-  - name: debian-8.8
-  - name: fedora-25
-  - name: opensuse-leap-42.2
+  - name: centos-6.7
+  - name: centos-7.1
+  - name: debian-7.8
+    run_list: apt::default
+  - name: debian-8.1
+    run_list: apt::default
+  - name: fedora-21
+  - name: ubuntu-12.04
+    run_list:
+      - recipe[apt::default]
   - name: ubuntu-14.04
-  - name: ubuntu-16.04
+    run_list:
+      - recipe[apt::default]
 
 suites:
 - name: default
   run_list:
-  - recipe[ssh_known_hosts_test]
+  - recipe[ssh_known_hosts]
   attributes: {}
 - name: cacher
   run_list:
-  - recipe[ssh_known_hosts_test::cacher]
+  - recipe[ssh_known_hosts::cacher]
   attributes: {}
 - name: cacher-client
   run_list:
-  - recipe[ssh_known_hosts_test::default]
+  - recipe[ssh_known_hosts::default]
   attributes:
     ssh_known_hosts:
       use_data_bag_cache: true
-- name: known_hosts_test
+- name: environment_search
   run_list:
-  - recipe[ssh_known_hosts_test::custom]
+  - recipe[ssh_known_hosts::default]
+  attributes:
+    ssh_known_hosts:
+      multi_environment:
+      - stage
