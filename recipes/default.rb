@@ -58,6 +58,7 @@ else
         'fqdn' => host['fqdn'] || host['ipaddress'] || host['hostname'],
         'key' => host['host_rsa_public'] || host['host_dsa_public']
       }
+      end
     end
   end
 end
