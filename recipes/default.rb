@@ -40,12 +40,13 @@ else
     # On Chef Solo, we still want the current node to be in the ssh_known_hosts
     hosts = [node]
   else
-    query = "keys_ssh:* NOT name:#{node.name}"
+    query = 'keys_ssh:*'
     if node['ssh_known_hosts']['multi_environment'].empty?
       query += ' AND (chef_environment:' + node['ssh_known_hosts']['multi_environment'].join(' OR chef_environment:') + ')'
     else
       query += " AND chef_environment:#{node.chef_environment}"
     end
+    query += " NOT name:#{node.name}"
     hosts = partial_search(:node, query,
                            :keys => {
                              'hostname' => [ 'hostname' ],
