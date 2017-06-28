@@ -40,26 +40,24 @@ else
     # On Chef Solo, we still want the current node to be in the ssh_known_hosts
     hosts = [node]
   else
-    query = 'keys_ssh:*'
-    if node['ssh_known_hosts']['multi_environment'].empty?
+    query = "keys_ssh:* NOT name:#{node.name}"
+    unless node['ssh_known_hosts']['multi_environment'].empty?
       query += ' AND (chef_environment:' + node['ssh_known_hosts']['multi_environment'].join(' OR chef_environment:') + ')'
     else
-      query += " AND chef_environment:#{node.chef_environment}"
-    end
-    query += " NOT name:#{node.name}"
+      query += ' AND chef_environment:#{node.chef_environment}'
     hosts = partial_search(:node, query,
-                           :keys => {
-                             'hostname' => [ 'hostname' ],
-                             'fqdn'     => [ 'fqdn' ],
-                             'ipaddress' => [ 'ipaddress' ],
-                             'host_rsa_public' => [ 'keys', 'ssh', 'host_rsa_public' ],
-                             'host_dsa_public' => [ 'keys', 'ssh', 'host_dsa_public' ]
+                           keys: {
+                             'hostname' => ['hostname'],
+                             'fqdn'     => ['fqdn'],
+                             'ipaddress' => ['ipaddress'],
+                             'host_rsa_public' => %w(keys ssh host_rsa_public),
+                             'host_dsa_public' => %w(keys ssh host_dsa_public)
                            }
                           ).collect do |host|
-                            {
-                              'fqdn' => host['fqdn'] || host['ipaddress'] || host['hostname'],
-                              'key' => host['host_rsa_public'] || host['host_dsa_public']
-                            }
+      {
+        'fqdn' => host['fqdn'] || host['ipaddress'] || host['hostname'],
+        'key' => host['host_rsa_public'] || host['host_dsa_public']
+      }
     end
   end
 end
